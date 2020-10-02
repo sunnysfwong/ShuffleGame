@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>Shuffle Game</title>
+	<style>
+		:root {
+			--p: 7;
+			--rowNum: 4;
+			--colNum: 5;
+			--gridHeight: calc(400px / var(--rowNum) - 5px * (var(--rowNum) - 1) / var(--rowNum));
+		}
+		body {
+			font-family: Calibri, Lucida Grande;
+			margin: 0;
+			overflow-x: hidden;
+			justify-content: center;
+		}
+		.wrapper {
+			display: grid;
+			grid-template-rows: 100px auto;
+			grid-template-columns: auto;
+			gap: 5px;
+		}
+		.grid-main {
+			display: grid;
+			grid-template-rows: repeat(var(--rowNum), 100px);
+			grid-template-columns: repeat(var(--colNum), 100px);
+			gap: 5px;
+			justify-content: center;
+		}
+		.grid-item {
+			grid-column-start: auto;
+			grid-row-start: auto;
+			display: flex;
+			
+			background-color: #ffffff;
+			border-radius: 5px;
+			border: 5px solid #000000;
+			color: #000000;
+			align-items: center;
+			justify-content: center;
+			font-size: 150%;
+		}
+		.grid-button {  
+			grid-column-start: auto;
+			grid-row-start: auto;
+			display: flex;
+			
+			background-color: #bbbbbb; /* Dark Gray */
+			border-radius: 5px;
+			border: 5px solid #000000;
+			color: #000000;
+			align-items: center;
+			justify-content: center;
+			font-size: 100%;
+		}
+		.control {
+			display: grid;
+			grid-template-rows: 100px;
+			grid-template-columns: 100px 100px;
+			gap: 5px;
+			justify-content: center;
+		}
+	</style>
+</head>
+<script>
+$ = el => document.querySelector(el);
+
+function add() {
+  $('.wrapper').innerHTML += '<div class="grid-item"></div>';
+  updateVar();
+}
+
+function del() {  
+  $('.grid-item:last-child').parentNode.removeChild($('.grid-item:last-child'));
+  updateVar();
+}
+
+function updateVar(action) {
+  let htmlStyles = window.getComputedStyle($("html"));
+  let rowNum = parseInt(htmlStyles.getPropertyValue("--rowNum"));
+  let colNum = parseInt(htmlStyles.getPropertyValue("--colNum"));
+  let gridItemsCount = document.querySelectorAll('.grid-item').length;
+  document.documentElement.style.setProperty(`--rowNum`, Math.ceil(gridItemsCount/colNum));  
+}
+
+function changeCol(action) {
+  let htmlStyles = window.getComputedStyle($("html"));
+  let colNum = parseInt(htmlStyles.getPropertyValue("--colNum"));
+  if (action == 'add') {
+    document.documentElement.style.setProperty(`--colNum`, colNum+1);    
+  } else {    
+    document.documentElement.style.setProperty(`--colNum`, colNum-1);
+  }
+  updateVar();
+}
+var p = 7;
+var gridData = Array(p*p).fill().map((_, i) => i+1);
+function resetGrid(gridSize) {
+	p = gridSize;
+	gridData = Array(p*p).fill().map((_, i) => i+1);
+	showGrid();
+}
+function showGrid() {
+	var grid = document.getElementById("myGrid");
+	let htmlStyles = window.getComputedStyle($("html"));
+	document.documentElement.style.setProperty('--rowNum', p);  
+	document.documentElement.style.setProperty('--colNum', p+2);  
+	grid.innerHTML = "";
+	for(var i = 1; i < p+1; i++){
+		grid.innerHTML += "<button class=\"grid-button\" onclick=\"shiftLeft("+i+")\"><div>Left Shift Row "+i+"</div> </button>";
+		grid.innerHTML += "<div class=\"grid-item\"><span>" + gridData.slice(p*(i-1),p*i).join("</span></div><div class=\"grid-item\"><span>") + "</span></div>";
+		grid.innerHTML += "<button class=\"grid-button\" onclick=\"shiftRight("+i+")\"><div>Right Shift Row "+i+"</div> </button>";
+	}
+}
+function shiftLeft(row) {
+	gridData.splice(p*row,0,gridData[p*(row-1)]);
+	gridData.splice(p*(row-1),1);
+	showGrid();
+}
+function shiftRight(row) {
+	gridData.splice(p*(row-1),0,gridData[p*row-1]);
+	gridData.splice(p*row,1);
+	showGrid();
+}
+function shiftAllUp(){
+	gridData.splice(p*p,0,...gridData.slice(0,p));
+	gridData.splice(0,p);
+	showGrid();
+}
+function shiftAllDown(){
+	gridData.splice(0,0,...gridData.slice(p*(p-1),p*p));
+	gridData.splice(p*p,p);
+	showGrid();
+}
+</script>
+<body onload="resetGrid(2)">
+<div class="wrapper">
+	<div id="myControl" class="control">
+		<button class="grid-button" onclick="shiftAllUp()"><div>Shift All Up</div></button>
+		<button class="grid-button" onclick="shiftAllDown()"><div>Shift All Down</div></button>
+	</div>
+	<div id="myGrid" class="grid-main">
+	</div>
+</div>
+</body>
+</html>
