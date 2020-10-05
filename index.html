@@ -16,8 +16,7 @@
 			justify-content: center;
 		}
 		.rainbow-background {
-			background-image: linear-gradient(to bottom right, #b827fc 0%, #2c90fc 25%, #b8fd33 50%, #fec837 75%, #fd1892 100%);
-			/*background-image-slice: 1;*/
+			background-image: linear-gradient(to bottom right, #cc33ff 0%, #3399ff 25%, #ccff33 50%, #ffcc33 75%, #ff0099 100%);
 		}
 		.wrapper {
 			display: grid;
@@ -444,7 +443,7 @@ function changeMode(){
 }
 function randomize(){
 	if(mode){
-		for(var k = 0; 4*k < p*p; k++){
+		for(var k = 0; k < p*p; k++){
 			if(Math.floor(Math.random()*2)){
 				var row = Math.floor(Math.random()*p);
 				var temp = gridData[row][p-1];
@@ -462,7 +461,7 @@ function randomize(){
 			}
 		}
 	}else{
-		for(var k = 0; 4*k < p*p; k++){
+		for(var k = 0; 2*k < p*(p+1); k++){
 			if(Math.floor(Math.random()*2)){
 				var row = Math.floor(Math.random()*p);
 				var temp = gridData[row][p-1];
