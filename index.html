@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <meta charset="utf-8"/>
 	<title>Shuffle Game</title>
 	<style>
 		:root {
@@ -10,21 +10,22 @@
 			--colNum: 7;
 		}
 		body {
+			display: flex;
 			font-family: Calibri, Lucida Grande;
-			justify-content: center;
+			justify-items: center;
 		}
 		.rainbow-background {
 			background-image: linear-gradient(to bottom right, #cc33ff 0%, #3399ff 25%, #ccff33 50%, #ffcc33 75%, #ff0099 100%);
 		}
-		.wrapper {
+		.main {
 			display: grid;
-			grid-template-rows: auto;
+			grid-template-rows: fit-content(100%) fit-content(100%);
 			grid-template-columns: 200px fit-content(100%) 200px;
 			gap: 5px;
 			align-items: center;
-			justify-content: center;
 			border-radius: 5px;
 			border: 5px solid #000000;
+			margin: auto;
 		}
 		.grid-main {
 			display: grid;
@@ -483,9 +484,9 @@ function randomize(){
 }
 </script>
 </head>
-<body onload="resetGrid(5)">
-<div class="wrapper">
-	<div id="myControl" class="control">
+<body onload="resetGrid(3)">
+<div class="main">
+	<div class="control">
 		<button class="grid-button" onclick="changeSize()"><div>Change Grid Size</div></button>
 		<button class="grid-button" onclick="changeMode()"><div id="changeModeText">Change Mode</br>Current: Easy</div></button>
 		<button class="grid-button" onclick="randomize()"><div>Shuffle Grid</div></button>
@@ -503,13 +504,13 @@ function randomize(){
 		<div id="rightGrid" class="grid-right">
 		</div>
 	</div>
-	<div id="myControl" class="control">
+	<div class="control">
 		<button class="grid-button" onclick="shiftAllUp()"><div>Move All Up</div></button>
 		<button class="grid-button" onclick="shiftAllDown()"><div>Move All Down</div></button>
 		<button class="grid-button" onclick="shiftAllLeft()"><div>Shift All Left</div></button>
 		<button class="grid-button" onclick="shiftAllRight()"><div>Shift All Right</div></button>
 	</div>
+	<div style="text-align: right; grid-column: 1 / 4;">v2.5</div>
 </div>
-<div style="text-align: right;">v2.4</div>
 </body>
 </html>
