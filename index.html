@@ -91,7 +91,7 @@
 			color: #000000;
 			align-items: center;
 			justify-content: center;
-			font-size: 150%;
+			font-size: 200%;
 		}
 		.grid-transparent {
 			grid-column-start: auto;
@@ -104,7 +104,7 @@
 			color: #000000;
 			align-items: center;
 			justify-content: center;
-			font-size: 150%;
+			font-size: 200%;
 			opacity: 0;
 			z-index: -1;
 		}
@@ -424,6 +424,7 @@ function changeSize(){
 	if (Number.isInteger(gridSize)){
 		if (1 < gridSize && gridSize < 20){
 			resetGrid(gridSize);
+			randomize()
 		}else{
 			alert("Input is out of range!");
 		}
@@ -439,6 +440,7 @@ function changeMode(){
 		document.getElementById("changeModeText").innerHTML = "Change Mode</br>Current: Easy</div>";
 	}
 	resetGrid(p);
+	randomize();
 }
 function randomize(){
 	if(mode){
@@ -487,7 +489,7 @@ function randomize(){
 	<div id="myControl" class="control">
 		<button class="grid-button" onclick="changeSize()"><div>Change Grid Size</div></button>
 		<button class="grid-button" onclick="changeMode()"><div id="changeModeText">Change Mode</br>Current: Easy</div></button>
-		<button class="grid-button" onclick="randomize()"><div>Randomize</div></button>
+		<button class="grid-button" onclick="randomize()"><div>Shuffle Grid</div></button>
 		<button class="grid-button" onclick="resetGrid(0)"><div>Reset Grid</div></button>
 	</div>
 	<div class="grid-main">
