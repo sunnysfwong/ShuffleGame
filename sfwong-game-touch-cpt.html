@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+	<title>Shuffle Game</title>
+	<style>
+		:root {
+			--p: 7;
+			--rowNum: 7;
+			--colNum: 7;
+		}
+		body {
+			display: flex;
+			font-family: Calibri, Lucida Grande;
+justify-items: center;
+    height: 100%;
+    overflow: hidden;
+    width: 100%;
+    position: fixed;
+		}
+		.rainbow-background {
+			background-image: linear-gradient(to bottom right, #cc33ff 0%, #3399ff 25%, #ccff33 50%, #ffcc33 75%, #ff0099 100%);
+		}
+		.main {
+			display: grid;
+			grid-template-rows: fit-content(100%) fit-content(100%);
+			grid-template-columns: 5px fit-content(100%) 5px;
+			gap: 5px;
+			align-items: center;
+			border-radius: 5px;
+			border: 5px solid #000000;
+			margin: auto;
+		}
+		.grid-main {
+			display: grid;
+			grid-template-rows: 20px auto 20px;
+			grid-template-columns: 20px auto 20px;
+			gap: 5px;
+			align-items: center;
+			justify-content: center;
+		}
+		.grid-center {
+			grid-column-start: 2;
+			grid-row-start: 2;
+			display: grid;
+			grid-template-rows: repeat(var(--rowNum), 100px);
+			grid-template-columns: repeat(var(--colNum), 100px);
+			gap: 5px;
+			justify-content: center;
+		}
+		.grid-nw {
+			grid-column-start: 1;
+			grid-row-start: 1;
+			display: grid;
+			grid-template-rows: 100px;
+			grid-template-columns: 100px;
+			gap: 5px;
+			justify-content: center;
+		}
+		.grid-ne {
+			grid-column-start: 3;
+			grid-row-start: 1;
+			display: grid;
+			grid-template-rows: 100px;
+			grid-template-columns: 100px;
+			gap: 5px;
+			justify-content: center;
+		}
+		.grid-sw {
+			grid-column-start: 1;
+			grid-row-start: 3;
+			display: grid;
+			grid-template-rows: 100px;
+			grid-template-columns: 100px;
+			gap: 5px;
+			justify-content: center;
+		}
+		.grid-se {
+			grid-column-start: 3;
+			grid-row-start: 3;
+			display: grid;
+			grid-template-rows: 100px;
+			grid-template-columns: 100px;
+			gap: 5px;
+			justify-content: center;
+		}
+		.grid-item {
+			grid-column-start: auto;
+			grid-row-start: auto;
+			display: flex;
+			
+			background-color: #ffffff;
+			border-radius: 5px;
+			border: 5px solid #000000;
+			color: #000000;
+			align-items: center;
+			justify-content: center;
+font-size: 300%;
+-webkit-touch-callout: none;
+  -webkit-user-select: none;
+   -khtml-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+		}
+		.grid-transparent {
+			grid-column-start: auto;
+			grid-row-start: auto;
+			display: flex;
+			
+			background-color: #ffffff;
+			border-radius: 5px;
+			border: 5px solid #000000;
+			color: #000000;
+			align-items: center;
+			justify-content: center;
+			font-size: 300%;
+			opacity: 0;
+			z-index: -1;
+		}
+		.grid-button {  
+			grid-column-start: auto;
+			grid-row-start: auto;
+			display: flex;
+			
+			background-color: #bbbbbb; /* Dark Gray */
+			border-radius: 5px;
+			border: 5px solid #000000;
+			color: #000000;
+			align-items: center;
+			justify-content: center;
+			font-size: 110%;
+		}.grid-arrow {  
+			grid-column-start: auto;
+			grid-row-start: auto;
+			display: flex;
+			
+			background-color: #dddddd; /* Dark Gray */
+			border-radius: 5px;
+			border: 5px solid #000000;
+			color: #000000;
+			align-items: center;
+			justify-content: center;
+			font-size: 180%;
+		}
+		.control{
+			display: grid;
+			grid-template-rows: 100px 100px 100px 100px;
+			grid-template-columns: 100px;
+			gap: 5px;
+			justify-content: center;
+		}
+	</style>
+	<script src="js/jquery-3.5.1.min.js"></script>
+        <!--<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>-->
+        <script type="text/javascript" src="js/jquery.touchSwipe.js"></script>
+        <script type="text/javascript" src="js/main.js"></script>
+
+<script>
+var p = 7;
+var gridData;
+var animationRowLock;
+var animationColLock;
+var animationMainRowLock;
+var animationMainColLock;
+var animationSpeed = 200;
+var mode = 0; // Easy: 0, Hard: 1
+function resetGrid(gridSize) {
+	if(gridSize != 0){
+		p = gridSize;
+	}
+	/*gridData = Array(p*p).fill().map((_, i) => i+1);*/
+	gridData = Array(p);
+	animationRowLock = Array(p).fill(0);
+	animationColLock = Array(p).fill(0);
+	animationMainRowLock = 0;
+	animationMainColLock = 0;
+	document.documentElement.style.setProperty('--p', p);  	
+	document.documentElement.style.setProperty('--rowNum', p+2);  
+	document.documentElement.style.setProperty('--colNum', p+2);  
+	var centerGrid = document.getElementById("centerGrid");
+	centerGrid.innerHTML = "";
+	for(var i = 0; i < p; i++){
+		gridData[i] = Array(p);
+		for(var j = 0; j < p; j++){
+			centerGrid.innerHTML += "<div id=\"block-"+i+"-"+j+"\" class=\"grid-item\" style=\"grid-row-start: "+(i+2)+"; grid-column-start: "+(j+2)+";\"><span>"+0+"</span></div>\n";
+			gridData[i][j] = i*p+j+1;
+		}
+	}
+	for(var i = 0; i < p; i++){
+		centerGrid.innerHTML += "<div id=\"block-"+i+"-L\" class=\"grid-transparent\" style=\"grid-row-start: "+(i+2)+"; grid-column-start: "+(0+1)+";\"><span>"+0+"</span></div>\n";
+	}
+	for(var i = 0; i < p; i++){
+		centerGrid.innerHTML += "<div id=\"block-"+i+"-R\" class=\"grid-transparent\" style=\"grid-row-start: "+(i+2)+"; grid-column-start: "+(p+2)+";\"><span>"+0+"</span></div>\n";
+	}
+	for(var i = 0; i < p; i++){
+		centerGrid.innerHTML += "<div id=\"block-T-"+i+"\" class=\"grid-transparent\" style=\"grid-row-start: "+(0+1)+"; grid-column-start: "+(i+2)+";\"><span>"+0+"</span></div>\n";
+	}
+	for(var i = 0; i < p; i++){
+		centerGrid.innerHTML += "<div id=\"block-B-"+i+"\" class=\"grid-transparent\" style=\"grid-row-start: "+(p+2)+"; grid-column-start: "+(i+2)+";\"><span>"+0+"</span></div>\n";
+		}
+
+	centerGrid.innerHTML +=	"<div id=\"nwGrid\" class=\"grid-nw\" style=\"grid-row-start: 1; grid-column-start: 1;\"></div>";
+	centerGrid.innerHTML +=	"<div id=\"neGrid\" class=\"grid-ne\" style=\"grid-row-start: 1; grid-column-start: "+(p+2)+";\"></div>";
+	centerGrid.innerHTML +=	"<div id=\"swGrid\" class=\"grid-sw\" style=\"grid-row-start: "+(p+2)+"; grid-column-start: 1;\"></div>";
+	centerGrid.innerHTML +=	"<div id=\"seGrid\" class=\"grid-se\" style=\"grid-row-start: "+(p+2)+"; grid-column-start: "+(p+2)+";\"></div>";
+	var neGrid = document.getElementById("neGrid");
+	var nwGrid = document.getElementById("nwGrid");
+	var seGrid = document.getElementById("seGrid");
+	var swGrid = document.getElementById("swGrid");
+	neGrid.innerHTML = "";
+	nwGrid.innerHTML = "";
+	seGrid.innerHTML = "";
+	swGrid.innerHTML = "";
+
+	nwGrid.innerHTML += "<button class=\"grid-button\" onclick=\"changeSize()\"><div>Change Grid Size</div> </button>\n";
+	if(mode){
+	neGrid.innerHTML += "<button class=\"grid-button\" onclick=\"changeMode()\"><div>Change Mode</br>Current: Hard</div> </button>\n";
+	}else{
+	neGrid.innerHTML += "<button class=\"grid-button\" onclick=\"changeMode()\"><div>Change Mode</br>Current: Easy</div> </button>\n";
+	}
+	swGrid.innerHTML += "<button class=\"grid-button\" onclick=\"randomize()\"><div>Shuffle Grid</div> </button>\n";
+	seGrid.innerHTML += "<button class=\"grid-button\" onclick=\"resetGrid(0)\"><div>Reset Grid</div> </button>\n";
+	showGrid();
+	if (mode==0) {
+		for(var i = 0; i < p; i++){
+		for(var j = 0; j < p; j++){
+			var str="$(function(){$(\"#block-"+i+"-"+j+
+	"\").swipe( {swipe:function(event, direction, distance,duration, fingerCount, fingerData){if (direction===\"left\") {shiftLeft("+i+")} if	(direction===\"right\") {shiftRight("+i+
+	")} if (direction===\"up\") {shiftAllUp()} if (direction===\"down\") {shiftAllDown("+
+	")}},threshold:10});});";
+eval(str);
+		}
+	}
+
+	} else {
+	for(var i = 0; i < p; i++){
+		for(var j = 0; j < p; j++){
+			var str="$(function(){$(\"#block-"+i+"-"+j+
+	"\").swipe( {swipe:function(event, direction, distance,duration, fingerCount, fingerData){if (direction===\"left\") {shiftLeft("+i+")} if	(direction===\"right\") {shiftRight("+i+
+	")} if (direction===\"up\") {shiftUp("+j+")} if (direction===\"down\") {shiftDown("+j+
+	")}},threshold:10});});";
+eval(str);
+		}
+	}
+}
+}
+function showGrid() {
+	$( "div.grid-item" ).removeClass("rainbow-background");
+	var sum = 0;
+	for(var i = 0; i < p; i++){
+		for(var j = 0; j < p; j++){
+			var tempBlock = document.getElementById("block-"+i+"-"+j);
+			tempBlock.innerHTML = "<span>"+gridData[i][j]+"</span>";
+			if (gridData[i][j] == i*p+j+1){
+				sum++;
+				
+			}
+		}
+	}
+	if (sum == p*p){
+		$( "div.grid-item" ).addClass("rainbow-background");
+	}	
+}
+function shiftLeft(row) {	
+	if (animationRowLock[row] == 0 && animationMainRowLock == 0){
+	$( "div.grid-item" ).removeClass("rainbow-background");
+	animationRowLock[row]++;
+	animationMainColLock++;
+	var temp = gridData[row][0];
+	for(var j = 0; j < p-1; j++){
+		gridData[row][j] = gridData[row][j+1];
+	}
+	gridData[row][p-1] = temp;
+	
+	
+	for(var j = 0; j < p; j++){
+		var tempBlock = document.getElementById("block-"+row+"-"+j);
+		tempBlock.style.setProperty('transition', 'all '+animationSpeed+'ms');
+		tempBlock.style.setProperty('transform', 'translateX(-105px)');
+		if (j == 0){
+			tempBlock.style.setProperty('opacity', '0');
+		}
+	}
+	
+	var tempTransparent = document.getElementById("block-"+row+"-R");
+	tempTransparent.style.setProperty('transition', 'all '+animationSpeed+'ms');
+	tempTransparent.style.setProperty('transform', 'translateX(-105px)');
+	tempTransparent.style.setProperty('opacity', '1');
+	tempTransparent.innerHTML = "<span>"+temp+"</span>";
+
+	setTimeout(function(){
+		for(var j = 0; j < p; j++){
+			var tempBlock = document.getElementById("block-"+row+"-"+j);
+			tempBlock.style.setProperty('transition', 'all 0ms');
+			tempBlock.style.setProperty('transform', 'translateX(0px)');
+			if (j == 0){
+				tempBlock.style.setProperty('opacity', '1');
+			}
+		}	
+		var tempTransparent = document.getElementById("block-"+row+"-R");
+		tempTransparent.style.setProperty('transition', 'all 0ms');
+		tempTransparent.style.setProperty('transform', 'translateX(0px)');
+		tempTransparent.style.setProperty('opacity', '0');
+		
+		showGrid();
+		animationRowLock[row]--;
+		animationMainColLock--;
+	},animationSpeed);
+	}	
+}
+function shiftRight(row) {
+	if (animationRowLock[row] == 0 && animationMainRowLock == 0){
+	$( "div.grid-item" ).removeClass("rainbow-background");
+	animationRowLock[row]++;
+	animationMainColLock++;
+	var temp = gridData[row][p-1];
+	for(var j = p-1; j > 0; j--){
+		gridData[row][j] = gridData[row][j-1];
+	}
+	gridData[row][0] = temp;
+	
+	for(var j = 0; j < p; j++){
+		var tempBlock = document.getElementById("block-"+row+"-"+j);
+		tempBlock.style.setProperty('transition', 'all '+animationSpeed+'ms');
+		tempBlock.style.setProperty('transform', 'translateX(105px)');
+		if (j == p-1){
+			tempBlock.style.setProperty('opacity', '0');
+		}
+	}
+	
+	var tempTransparent = document.getElementById("block-"+row+"-L");
+	tempTransparent.style.setProperty('transition', 'all '+animationSpeed+'ms');
+	tempTransparent.style.setProperty('transform', 'translateX(105px)');
+	tempTransparent.style.setProperty('opacity', '1');
+	tempTransparent.innerHTML = "<span>"+temp+"</span>";
+	
+	setTimeout(function(){
+		for(var j = 0; j < p; j++){
+			var tempBlock = document.getElementById("block-"+row+"-"+j);
+			tempBlock.style.setProperty('transition', 'transform 0ms');
+			tempBlock.style.setProperty('transform', 'translateX(0px)');
+			if (j == p-1){
+				tempBlock.style.setProperty('opacity', '1');
+			}
+		}	
+		
+		var tempTransparent = document.getElementById("block-"+row+"-L");
+		tempTransparent.style.setProperty('transition', 'all 0ms');
+		tempTransparent.style.setProperty('transform', 'translateX(0px)');
+		tempTransparent.style.setProperty('opacity', '0');
+			
+		showGrid();
+		animationRowLock[row]--;
+		animationMainColLock--;
+	},animationSpeed);
+	}
+}
+function shiftUp(col) {
+	if (animationColLock[col] == 0 && animationMainColLock == 0){
+	$( "div.grid-item" ).removeClass("rainbow-background");
+	animationColLock[col]++;
+	animationMainRowLock++;
+	var temp = gridData[0][col];
+	for(var i = 0; i < p-1; i++){
+		gridData[i][col] = gridData[i+1][col];
+	}
+	gridData[p-1][col] = temp;
+	
+	
+	for(var i = 0; i < p; i++){
+		var tempBlock = document.getElementById("block-"+i+"-"+col);
+		tempBlock.style.setProperty('transition', 'all '+animationSpeed+'ms');
+		tempBlock.style.setProperty('transform', 'translateY(-105px)');
+		if (i == 0){
+			tempBlock.style.setProperty('opacity', '0');
+		}
+	}
+	
+	var tempTransparent = document.getElementById("block-B-"+col);
+	tempTransparent.style.setProperty('transition', 'all '+animationSpeed+'ms');
+	tempTransparent.style.setProperty('transform', 'translateY(-105px)');
+	tempTransparent.style.setProperty('opacity', '1');
+	tempTransparent.innerHTML = "<span>"+temp+"</span>";
+
+	setTimeout(function(){
+		for(var i = 0; i < p; i++){
+			var tempBlock = document.getElementById("block-"+i+"-"+col);
+			tempBlock.style.setProperty('transition', 'all 0ms');
+			tempBlock.style.setProperty('transform', 'translateY(0px)');
+			if (i == 0){
+				tempBlock.style.setProperty('opacity', '1');
+			}
+		}	
+		var tempTransparent = document.getElementById("block-B-"+col);
+		tempTransparent.style.setProperty('transition', 'all 0ms');
+		tempTransparent.style.setProperty('transform', 'translateY(0px)');
+		tempTransparent.style.setProperty('opacity', '0');
+		
+		showGrid();
+		animationColLock[col]--;
+		animationMainRowLock--;
+	},animationSpeed);
+	}	
+}
+function shiftDown(col) {
+	if (animationColLock[col] == 0 && animationMainColLock == 0){
+	$( "div.grid-item" ).removeClass("rainbow-background");
+	animationColLock[col]++;
+	animationMainRowLock++;
+	var temp = gridData[p-1][col];
+	for(var i = p-1; i >0; i--){
+		gridData[i][col] = gridData[i-1][col];
+	}
+	gridData[0][col] = temp;
+	
+	
+	for(var i = 0; i < p; i++){
+		var tempBlock = document.getElementById("block-"+i+"-"+col);
+		tempBlock.style.setProperty('transition', 'all '+animationSpeed+'ms');
+		tempBlock.style.setProperty('transform', 'translateY(105px)');
+		if (i == p-1){
+			tempBlock.style.setProperty('opacity', '0');
+		}
+	}
+	
+	var tempTransparent = document.getElementById("block-T-"+col);
+	tempTransparent.style.setProperty('transition', 'all '+animationSpeed+'ms');
+	tempTransparent.style.setProperty('transform', 'translateY(105px)');
+	tempTransparent.style.setProperty('opacity', '1');
+	tempTransparent.innerHTML = "<span>"+temp+"</span>";
+
+	setTimeout(function(){
+		for(var i = 0; i < p; i++){
+			var tempBlock = document.getElementById("block-"+i+"-"+col);
+			tempBlock.style.setProperty('transition', 'all 0ms');
+			tempBlock.style.setProperty('transform', 'translateY(0px)');
+			if (i == p-1){
+				tempBlock.style.setProperty('opacity', '1');
+			}
+		}	
+		var tempTransparent = document.getElementById("block-T-"+col);
+		tempTransparent.style.setProperty('transition', 'all 0ms');
+		tempTransparent.style.setProperty('transform', 'translateY(0px)');
+		tempTransparent.style.setProperty('opacity', '0');
+		
+		showGrid();
+		animationColLock[col]--;
+		animationMainRowLock--;
+	},animationSpeed);
+	}	
+}
+function shiftAllLeft(){
+	for(var j = 0; j < p ;j++){
+		shiftLeft(j);
+	}
+}
+function shiftAllRight(){
+	for(var j = 0; j < p ;j++){
+		shiftRight(j);
+	}
+}
+function shiftAllUp(){
+	for(var j = 0; j < p ;j++){
+		shiftUp(j);
+	}
+}
+function shiftAllDown(){
+	for(var j = 0; j < p ;j++){
+		shiftDown(j);
+	}
+}
+function changeSize(){
+	var gridSize = parseInt(prompt("Please enter the size of the grid (1<n<20):"));
+	if (Number.isInteger(gridSize)){
+		if (1 < gridSize && gridSize < 20){
+			resetGrid(gridSize);
+			randomize()
+		}else{
+			alert("Input is out of range!");
+		}
+	}else{
+		alert("Input is not an integer!");
+	}
+}
+function changeMode(){
+	mode = 1-mode;
+	resetGrid(p);
+	randomize();
+}
+function randomize(){
+	if(mode){
+		for(var k = 0; k < p*p; k++){
+			if(Math.floor(Math.random()*2)){
+				var row = Math.floor(Math.random()*p);
+				var temp = gridData[row][p-1];
+				for(var j = p-1; j > 0; j--){
+					gridData[row][j] = gridData[row][j-1];
+				}
+				gridData[row][0] = temp;		
+			}else{
+				var col = Math.floor(Math.random()*p);
+				var temp = gridData[0][col];
+				for(var i = 0; i < p-1; i++){
+					gridData[i][col] = gridData[i+1][col];
+				}
+				gridData[p-1][col] = temp;	
+			}
+		}
+	}else{
+		for(var k = 0; 2*k < p*(p+1); k++){
+			if(Math.floor(Math.random()*2)){
+				var row = Math.floor(Math.random()*p);
+				var temp = gridData[row][p-1];
+				for(var j = p-1; j > 0; j--){
+					gridData[row][j] = gridData[row][j-1];
+				}
+				gridData[row][0] = temp;
+				
+			}else{
+				var tempArray = gridData[0];
+				for(var i = 0; i < p-1; i++){
+					gridData[i] = gridData[i+1];
+				}
+				gridData[p-1] = tempArray;
+			}
+		}
+	}
+	showGrid();
+}
+</script>
+</head>
+<body onload="resetGrid(3)">
+	<div class="main">
+	<div class="control">
+	</div>
+	<div class="grid-main">
+		<div id="centerGrid" class="grid-center">
+		<div id="nwGrid" class="grid-nw">
+		</div>
+		<div id="neGrid" class="grid-ne">
+		</div>
+		<div id="swGrid" class="grid-sw">
+		</div>
+		<div id="seGrid" class="grid-se">
+		</div>
+		</div>
+	</div>
+	<div style="text-align: right; grid-column: 1 / 4;">v2.5</div>
+	</div>
+	</div>
+</body>
+</html>
